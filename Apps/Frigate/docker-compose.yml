@@ -1,0 +1,147 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: frigate
+services:
+  frigate:
+    container_name: frigate
+    entrypoint: >
+      bash -c '
+        if [ ! -f "/config/config.yml" ]; then
+          echo -n "No config file found. Create one... "
+          {
+            echo "# config generated on $(date +%Y.%m.%d\ %H:%M:%S)"
+            echo "mqtt:"
+            echo "  enabled: False"
+            echo ""
+            echo "cameras:"
+            echo "  sample_camera: # <------ Name the camera"
+            echo "    ffmpeg:"
+            echo "      inputs:"
+            echo "        - path: rtsp://192.168.255.10/stream # <----- The stream you want to use for detection"
+            echo "          roles:"
+            echo "            - detect"
+            echo "    detect:"
+            echo "      enabled: False # <---- disable detection until you have a working camera feed"
+            echo "      width: 1280 # <---- update for your camera resolution"
+            echo "      height: 720 # <---- update for your camera resolution"
+          } > /config/config.yml
+          if [ $? -eq 0 ]; then
+            echo "done."
+          else
+            echo "error."
+            exit 1
+          fi
+        fi
+        /init'
+    privileged: true # this may not be necessary for all setups
+    image: ghcr.io/blakeblackshear/frigate:0.12.1
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/icon.png
+    network_mode: bridge
+    ports:
+      - target: 5000
+        published: "5000"
+        protocol: tcp
+      - target: 8554
+        published: "8554"
+        protocol: tcp
+      - target: 8555
+        published: "8555"
+        protocol: tcp
+      - target: 8555
+        published: "8555"
+        protocol: udp
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail -s http://localhost:5000/ || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    shm_size: "64mb" # update for your cameras based on calculation
+    devices:
+      - /dev/bus/usb:/dev/bus/usb  # passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0  # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/dri/renderD128  # for intel hwaccel, needs to be updated for your hardware
+    volumes:
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: /DATA/AppData/$AppID/config
+        target: /config
+      - type: bind
+        source: /DATA/AppData/$AppID/media
+        target: /media/frigate
+#      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+#        target: /tmp/cache
+#        tmpfs:
+#          size: 1G
+    x-casaos:
+      ports:
+        - container: "5000"
+          description:
+            en_us: "Web GUI port"
+        - container: "8554"
+          description:
+            en_us: "RTSP feeds"
+        - container: "8555"
+          description:
+            en_us: "WebRTC over tcp and udp"
+      volumes:
+        - container: /config
+          description:
+            en_us: Contains all configuration files.
+        - container: /media/frigate
+          description:
+            en_us: Contains database and all media files.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Surveillance
+  description:
+    en_us: |
+      Use of a Google Coral Accelerator is optional, but highly recommended. The Coral will outperform even the best CPUs and can process 100+ FPS with very little overhead.
+
+      * Tight integration with Home Assistant via a custom component
+      * Designed to minimize resource use and maximize performance by only looking for objects when and where it is necessary
+      * Leverages multiprocessing heavily with an emphasis on realtime over processing every frame
+      * Uses a very low overhead motion detection to determine where to run object detection
+      * Object detection with TensorFlow runs in separate processes for maximum FPS
+      * Communicates over MQTT for easy integration into other systems
+      * Records video with retention settings based on detected objects
+      * 24/7 recording
+      * Re-streaming via RTSP to reduce the number of connections to your camera
+      * WebRTC & MSE support for low-latency live view
+
+      Visit [Frigate](https://frigate.video/) for more details. Check the [documentation](https://docs.frigate.video/) for further settings.
+  developer: Blake Blackshear
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/icon.png
+  index: /
+  main: frigate
+  port_map: "5000"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  screenshot_link:
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-1.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-2.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-3.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-4.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-5.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-6.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/screenshot-7.png
+  store_app_id: frigate
+  tagline:
+    en_us: |
+      A complete and local NVR designed for Home Assistant with AI object detection. Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/icon.png
+  tips:
+    before_install:
+      en_us: |
+        Frigate will use ports `5000/tcp`, `8554/tcp`, `8555/tcp` and `8555/udp`. After installing further setup is needed.
+
+        [Website](https://frigate.video) &bull; [Documentation](https://docs.frigate.video/guides/getting_started)
+  title:
+    en_us: Frigate NVR

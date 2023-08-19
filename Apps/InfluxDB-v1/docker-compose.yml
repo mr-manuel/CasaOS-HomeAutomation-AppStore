@@ -1,0 +1,70 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: influxdb-v1
+services:
+  influxdb-v1:
+    container_name: influxdb-v1
+    image: influxdb:1.8
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v1/icon.png
+    network_mode: bridge
+    ports:
+      - target: 8086
+        published: "8091"
+        protocol: tcp
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail -s http://localhost:8086/health || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/config
+        target: /etc/influxdb
+      - type: bind
+        source: /DATA/AppData/$AppID/data
+        target: /var/lib/influxdb
+    x-casaos:
+      ports:
+        - container: "8091"
+          description:
+            en_us: ""
+      volumes:
+        - container: /etc/influxdb
+          description:
+            en_us: Contains all configuration files.
+        - container: /var/lib/influxdb
+          description:
+            en_us: Contains all database files.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Database
+  description:
+    en_us: |
+      Visit [Influx Data](https://www.influxdata.com/influxdb/) for more details. Check the [documentation](https://docs.influxdata.com/influxdb/v1.8/) for further settings.
+
+      🚨 Note: This app will always stay on the latest version of 1.x. If you want to upgrade always to the latest version install `InfluxDB` instead.
+  developer: Influx Data
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v1/icon.png
+  index: /health
+  main: influxdb-v1
+  port_map: "8091"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  store_app_id: influxdb-v1
+  tagline:
+    en_us: |
+      Manage all types of time series data in a single, purpose-built database.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v1/icon.png
+  tips:
+    before_install:
+      en_us: |
+        The database will be reachable at port `8091`.
+
+        [Website](https://www.influxdata.com/influxdb/) &bull; [Documentation](https://docs.influxdata.com/influxdb/v1.8/)
+  title:
+    en_us: InfluxDB v1

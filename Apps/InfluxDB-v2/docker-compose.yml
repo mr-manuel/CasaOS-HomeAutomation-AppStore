@@ -1,0 +1,77 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: influxdb-v2
+services:
+  influxdb-v2:
+    container_name: influxdb-v2
+    image: influxdb:2.7
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/icon.png
+    network_mode: bridge
+    ports:
+      - target: 8086
+        published: "8092"
+        protocol: tcp
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail -s http://localhost:8086/health || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/config
+        target: /etc/influxdb2
+      - type: bind
+        source: /DATA/AppData/$AppID/data
+        target: /var/lib/influxdb2
+    x-casaos:
+      ports:
+        - container: "8092"
+          description:
+            en_us: ""
+      volumes:
+        - container: /etc/influxdb2
+          description:
+            en_us: Contains all configuration files.
+        - container: /var/lib/influxdb2
+          description:
+            en_us: Contains all database files.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Database
+  description:
+    en_us: |
+      Visit [Influx Data](https://www.influxdata.com/influxdb/) for more details. Check the [documentation](https://docs.influxdata.com/influxdb/v2.7/) for further settings.
+
+      🚨 Note: This app will always stay on the latest version of 2.x. If you want to upgrade always to the latest version install `InfluxDB` instead.
+  developer: Influx Data
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/icon.png
+  index: /
+  main: influxdb-v2
+  port_map: "8092"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  screenshot_link:
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-1.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-2.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-3.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-4.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-5.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/screenshot-6.png
+  store_app_id: influxdb-v2
+  tagline:
+    en_us: |
+      Manage all types of time series data in a single, purpose-built database.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/InfluxDB-v2/icon.png
+  tips:
+    before_install:
+      en_us: |
+        The database will be reachable at port `8092`.
+
+        [Website](https://www.influxdata.com/influxdb/) &bull; [Documentation](https://docs.influxdata.com/influxdb/v2.7/)
+  title:
+    en_us: InfluxDB v2

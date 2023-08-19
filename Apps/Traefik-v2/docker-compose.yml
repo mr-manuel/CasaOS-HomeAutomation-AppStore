@@ -1,0 +1,111 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: traefik-v2
+services:
+  traefik-v2:
+    container_name: traefik-v2
+    #command: --api.insecure=true --providers.docker
+    command: >
+      sh -c '
+        if [ ! -f "/etc/traefik/traefik.yml" ]; then
+          echo -n "No config file found. Downloading config from GitHub... "
+          wget -O /etc/traefik/traefik.yml https://raw.githubusercontent.com/traefik/traefik/v2.10/traefik.sample.yml
+          if [ $? -eq 0 ]; then
+            echo "done."
+          else
+            echo "error."
+            exit 1
+          fi
+          echo -n "Enabeling API... "
+          sed -i "s/#api:/api:/" /etc/traefik/traefik.yml
+          sed -i "s/#  insecure:/  insecure:/" /etc/traefik/traefik.yml
+          echo "done."
+          echo -n "Enabeling Docker... "
+          sed -i "s/#providers:/providers:/g" /etc/traefik/traefik.yml
+          sed -i "s/#  docker:/  docker:/g" /etc/traefik/traefik.yml
+          sed -i "s/^#    endpoint: tcp:\/\/.*/    endpoint: \"unix:\/\/\/var\/run\/docker.sock\"/g" /etc/traefik/traefik.yml
+          echo "done."
+        fi
+        traefik'
+    image: traefik:2.10
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/icon.png
+    network_mode: bridge
+    ports:
+      - target: 80
+        published: "81"
+        protocol: tcp
+      - target: 443
+        published: "443"
+        protocol: tcp
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: /DATA/AppData/$AppID/config
+        target: /etc/traefik
+    x-casaos:
+      ports:
+        - container: "81"
+          description:
+            en_us: "HTTP port"
+        - container: "443"
+          description:
+            en_us: "HTTPS port"
+        - container: "8080"
+          description:
+            en_us: "Web UI port"
+      volumes:
+        - container: /var/run/docker.sock
+          description:
+            en_us: Access to Docker socket to read container informations and automatically create entries.
+        - container: /etc/traefik
+          description:
+            en_us: Contains all configuration files.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Network
+  description:
+    en_us: |
+      Traefik allows you to access multiple containers on the same IP via port HTTP/HTTP and hostnames. Since Traefik reads the Docker containers it automatically searches for an open port and makes it available.
+
+      By default Traefik will use port `81` for `HTTP`, port `443` for `HTTPS` and port `8080` for the dashboard. If you want to use port `80` for `HTTP`, then you have first to change the WebUI port of CasaOS first under the settings in the top left menu. After deploying the container you can change the port mapping from `81` to `80`.
+
+      Visit [Traefik Labs](https://traefik.io) for more details. Check the [documentation](https://doc.traefik.io/traefik/v2.10) for further settings.
+
+      🚨 Note: This app will always stay on the latest version of 2.x. If you want to upgrade always to the latest version install `Traefik` instead.
+  developer: Traefik Labs
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/icon.png
+  index: /dashboard/
+  main: traefik-v2
+  port_map: "8080"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  screenshot_link:
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-1.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-2.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-3.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-4.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-5.png
+    - https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/screenshot-6.png
+  store_app_id: traefik-v2
+  tagline:
+    en_us: |
+      Traefik is the leading open-source reverse proxy and load balancer for HTTP and TCP-based applications that is easy, dynamic and full-featured.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Traefik-v2/icon.png
+  tips:
+    before_install:
+      en_us: |
+        By default Traefik will use port `81` for `HTTP`, port `443` for `HTTPS` and port `8080` for the dashboard. If you want to use port `80` for `HTTP`, then you have first to change the WebUI port of CasaOS first under the settings in the top left menu. After deploying the container you can change the port mapping from `81` to `80`.
+
+        [Website](https://traefik.io) &bull; [Documentation](https://doc.traefik.io/traefik/v2.10)
+  title:
+    en_us: Traefik v2

@@ -1,0 +1,41 @@
+name: Recreate latest release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  recreate-latest-release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Delete latest tag and release
+        uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+        with:
+          tag_name: latest
+          github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+#          delete_release: true #(optional) default: true
+#          repo: <owner>/<repoName> #(optional) target repository. default: repo running this action
+
+      - name: Create latest tag and release
+        id: create_release
+        uses: avakar/tag-and-release@v1
+        with:
+          tag_name: latest
+          release_name: latest
+          body: "Always up to date version"
+#          draft: false # does not work
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release
+        uses: eregon/publish-release@v1
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

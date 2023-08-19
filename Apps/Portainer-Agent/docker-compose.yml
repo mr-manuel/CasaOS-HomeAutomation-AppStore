@@ -1,0 +1,64 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: portainer-agent
+services:
+  portainer-agent:
+    container_name: portainer-agent
+    image: portainer/agent:2.18.4  # :latest would also match in this case, since there are no static files
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Portainer-Agent/icon.png
+      traefik.enable: false
+    network_mode: bridge
+    ports:
+      - target: 9001
+        published: "9001"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: /var/lib/docker/volumes
+        target: /var/lib/docker/volumes
+    x-casaos:
+      ports:
+        - container: "9001"
+          description:
+            en_us: ""
+      volumes:
+        - container: /var/run/docker.sock
+          description:
+            en_us: Access to Docker socket to read and write informations.
+        - container: /var/lib/docker/volumes
+          description:
+            en_us: Access to Docker volumes to be able to browse data in Portainer.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Utilities
+  description:
+    en_us: |
+      Check the [documentation](https://docs.portainer.io/admin/environments/add/docker/agent) for further settings.
+  developer: Portainer
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Portainer-Agent/icon.png
+  # index: "/"
+  main: portainer-agent
+  # port_map: "9001"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  store_app_id: portainer-agent
+  tagline:
+    en_us: |
+      The Portainer Agent container is used by Portainer to communicate with the Portainer Server instance and provide access to the node's resources.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Portainer-Agent/icon.png
+  tips:
+    before_install:
+      en_us: |
+        The agent will be reachable at port `9001`.
+
+        [Website](https://portainer.io) &bull; [Documentation](https://docs.portainer.io/admin/environments/add/docker/agent)
+  title:
+    en_us: Portainer-Agent
