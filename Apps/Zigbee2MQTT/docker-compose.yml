@@ -1,0 +1,77 @@
+# https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/CONTRIBUTING.md
+
+name: zigbee2mqtt
+services:
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    command: >
+        sh -c '
+          CONFIG_FILE="/app/data/configuration.yaml"
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "No config file found. Creating one..."
+            if [ ! -d "/app/data" ]; then
+              echo "Creating directory /app/data..."
+              mkdir -p /app/data
+            fi
+            wget -O /app/data/configuration.yaml https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/master/data/configuration.yaml
+            echo "Config file downloaded successfully."
+          fi'
+    image: koenkk/zigbee2mqtt:latest
+    labels:
+      icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Zigbee2MQTT/icon.png
+      traefik.enable: false
+    network_mode: bridge
+    ports:
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+    devices:
+     # Make sure this matched your adapter location, use "lsusb" to find it.
+      - /dev/bus/usb:/dev/bus/usb  # passes the zigbee usb adapter, check compatibility here https://www.zigbee2mqtt.io/guide/adapters/
+    volumes:
+      - type: bind
+        source: /DATA/AppData/zigbee2mqtt/data
+        target: /app/data
+      - type: bind
+        source: /run/udev
+        target: /run/udev:ro
+    x-casaos:
+      ports:
+        - container: "8080"
+          description:
+            en_us: ""
+      volumes:
+        - container: /app/data
+          description:
+            en_us: Contains all data files.
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+    - arm
+  author: mr-manuel
+  category: Home Automation
+  description:
+    en_us: |
+      Visit [Zigbee2MQTT](https://www.zigbee2mqtt.io) for more details. Check the [documentation](https://www.zigbee2mqtt.io/guide/getting-started/) for further settings.
+  developer: Koenkk (Koen Kanters)
+  icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Zigbee2MQTT/icon.png
+  # index: "/"
+  main: zigbee2mqtt
+  # port_map: "8080"
+  project_url: https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore
+  store_app_id: zigbee2mqtt
+  tagline:
+    en_us: |
+      Zigbee2MQTT allows you to use your Zigbee devices without the vendor's bridge or gateway. It bridges events and allows you to control your Zigbee devices via MQTT. In this way you can integrate your Zigbee devices with whatever smart home infrastructure you are using.
+  thumbnail: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Zigbee2MQTT/icon.png
+  tips:
+    before_install:
+      en_us: |
+        The Zigbee2MQTT will be reachable at port `8080`.
+
+        Please configure the configuration.yaml of Zigbee2MQTT based on [here](https://www.zigbee2mqtt.io/guide/installation/01_linux.html#configuring).
+        [Website](https://www.zigbee2mqtt.io/) &bull; [Documentation](https://www.zigbee2mqtt.io/guide/getting-started/)
+  title:
+    en_us: Zigbee2MQTT
