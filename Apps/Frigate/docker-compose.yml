@@ -34,7 +34,7 @@ services:
         fi
         /init'
     privileged: true # this may not be necessary for all setups
-    image: ghcr.io/blakeblackshear/frigate:0.12.1
+    image: ghcr.io/blakeblackshear/frigate:stable
     labels:
       icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Frigate/icon.png
     network_mode: bridge
