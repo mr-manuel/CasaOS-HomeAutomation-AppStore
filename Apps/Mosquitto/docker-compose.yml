@@ -25,7 +25,7 @@ services:
         fi
         echo "Starting Mosquitto"
         /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf'
-    image: eclipse-mosquitto:stable
+    image: eclipse-mosquitto:2.0.18
     labels:
       icon: https://raw.githubusercontent.com/mr-manuel/CasaOS-HomeAutomation-AppStore/latest/Apps/Mosquitto/icon.png
       traefik.enable: false
